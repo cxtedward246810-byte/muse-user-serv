@@ -1,0 +1,51 @@
+#spring:
+#  datasource:
+##    url: jdbc:xugu://127.0.0.1:5138/gx
+#    url: jdbc:xugu://10.159.90.202:36034/ythpt?useSSL=false&characterEncoding=utf-8
+#    username: SYSDBA
+#    password: Sysdba2024@Xugu
+#    driver-class-name: com.xugu.cloudjdbc.Driver
+#  application:
+#    name: user-service
+#  config:
+#    import: nacos:user-service.yml
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: localhost:8848
+#      config:
+#        server-addr: localhost:8848
+#        file-extension: yml
+#
+##mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+#mybatis:
+#  mapperLocations: classpath:mapper/*.xml
+#  typeAliasesPackage: com.tao.userloginandauth.pojo
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+spring:
+  datasource:
+    url: jdbc:xugu://10.159.90.202:36034/ythpt
+#    url: jdbc:xugu://10.159.90.202:36034/system
+#    url: jdbc:xugu://10.159.90.201:31239/GRIDFSTDB
+    username: SYSDBA
+    password: Sysdba2024@Xugu
+#    password: Sysdba2023@Xugu
+    driver-class-name: com.xugu.cloudjdbc.Driver
+#mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+  typeAliasesPackage: com.tao.userloginandauth.pojo
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+server:
+  port: 9083
+
+
+
+#privateKeyPem : /home/cloudtao/Projects/ythptServer/user/config/privateKey.pem
+privateKeyPem : D:/px/privateKey.pem
+#publicKeyPem : /home/cloudtao/Projects/ythptServer/user/config/publicKey.pem
+publicKeyPem : D:/px/publicKey.pem
+

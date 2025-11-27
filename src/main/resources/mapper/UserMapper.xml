@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tao.userloginandauth.mapper.UserMapper">
+    <!--    <select id="selectByUser" resultType="User">-->
+    <!--        select *-->
+    <!--        from t_user-->
+    <!--        where userName = #{username}-->
+    <!--    </select>-->
+
+    <!--    <select id="selectUserPermissions" resultType="java.util.HashMap">-->
+    <!--        SELECT ur.role  FROM `t_user` u  JOIN `t_user_role` ur ON u.id = ur.parentId         WHERE u.userName = #{userName};-->
+    <!--    </select>-->
+    <!--    <select id="getUserByUserName" resultType="User">-->
+    <!--        select *-->
+    <!--        from `t_user`-->
+    <!--        where userName = #{userName}-->
+    <!--    </select>-->
+
+    <!--    <select id="getUserById" resultType="User">-->
+    <!--        select  * from t_user where id = #{id}-->
+    <!--    </select>-->
+
+    <insert id="register">
+        insert into t_ythpt_user (userName, password, email, phone, areaCode, showName,departmentId)
+        values (#{userName}, #{password}, #{email}, #{phone}, #{areaCode}, #{showName},#{departmentId})
+    </insert>
+
+    <update id="update">
+        UPDATE t_ythpt_user
+        <set>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="areaCode != null and areaCode != ''">
+                areaCode = #{areaCode},
+            </if>
+            <if test="showName != null and showName != ''">
+                showName = #{showName},
+            </if>
+            <if test="userName != null and userName != ''">
+                userName = #{userName},
+            </if>
+            <if test="departmentId != null and departmentId != ''">
+                departmentId = #{departmentId}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="selectByUser" resultType="User">
+        select *
+        from t_ythpt_user
+        where userName = #{username}
+    </select>
+
+    <select id="selectALLUser" resultType="User">
+        select *
+        from t_ythpt_user
+    </select>
+
+    <delete id="deleteUser">
+        delete from  t_ythpt_user
+        where id = #{id}
+    </delete>
+    <select id="countUserListByConditions" resultType="int">
+        SELECT COUNT(*)
+        FROM t_ythpt_user
+        WHERE 1=1
+        <if test="departmentId != null and departmentId != ''">
+            AND departmentId in ${departmentId}
+        </if>
+        <if test="areaCode != null and areaCode != ''">
+            AND areaCode = #{areaCode}
+        </if>
+    </select>
+
+    <select id="getUserListByConditions" resultType="User">
+        SELECT id, userName, email, phone, userInfo, areaCode, showName, departmentId
+        FROM t_ythpt_user
+        WHERE 1=1
+        <if test="departmentId != null and departmentId != ''">
+            AND departmentId in ${departmentId}
+        </if>
+        <if test="areaCode != null and areaCode != ''">
+            AND areaCode like #{areaCode}
+        </if>
+        <if test="userName != null and userName != ''">
+            AND userName like #{userName}
+        </if>
+        <if test="showName != null and showName != ''">
+            AND showName like #{showName}
+        </if>
+
+        <!-- 排序字段 -->
+        ORDER BY
+        <choose>
+            <when test="sort == 'userName'"> userName </when>
+            <when test="sort == 'email'"> email </when>
+            <when test="sort == 'phone'"> phone </when>
+            <when test="sort == 'showName'"> showName </when>
+            <otherwise> id </otherwise>
+        </choose>
+        <if test="order != null and order.toLowerCase() == 'desc'"> DESC </if>
+        <if test="order != null and order.toLowerCase() == 'asc'"> ASC </if>
+
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+
+    <select id="selectUserPermissions" resultType="java.util.HashMap">
+        SELECT ur.role
+        FROM `t_ythpt_user` u
+                 JOIN `t_ythpt_user_role` ur ON u.id = ur.parentId
+        WHERE u.userName = #{userName};
+    </select>
+    <select id="getUserByUserName" resultType="java.util.HashMap">
+        select userName,password,showName,phone,areaCode,userInfo,email,id
+        from `t_ythpt_user_encry`
+        where userName = #{userName}
+    </select>
+<!--    <select id="getUserByUserName" resultType="java.util.HashMap">-->
+<!--        select *-->
+<!--        from `t_ythpt_user_encry`-->
+<!--        where userName = #{userName}-->
+<!--    </select>-->
+<!--    <select id="getUserByUserName" resultType="User">-->
+<!--        select *-->
+<!--        from `t_ythpt_user`-->
+<!--        where userName = #{userName}-->
+<!--    </select>-->
+
+    <select id="getUserById" resultType="User">
+        select *
+        from t_ythpt_user
+        where id = #{id}
+    </select>
+<!--    <select id="getAllUserInfo" resultType="com.tao.userloginandauth.pojo.User">-->
+<!--        select * from t_ythpt_user-->
+<!--    </select>-->
+    <select id="getAllUserInfo" resultType="java.util.HashMap">
+        select * from t_ythpt_user
+    </select>
+
+    <select id="getUserByEmail" resultType="java.util.HashMap">
+        select userName,password,showName,phone,areaCode,userInfo,email,id
+        from `t_ythpt_user_encry`
+        where email = #{email}
+    </select>
+
+
+<!--    <select id="getUserInfoByUserName" resultType="com.tao.userloginandauth.pojo.User">-->
+<!--        SELECT-->
+<!--            t_user.*, t_role.role-->
+<!--        FROM t_ythpt_user t_user-->
+<!--        left join  t_ythpt_user_role t_role-->
+<!--        on t_user.id = t_role.parentId-->
+<!--        WHERE userName = #{userName}-->
+<!--    </select>-->
+    <!-- 主查询：只查用户 -->
+    <select id="getUserInfoByUserName" resultMap="UserWithRolesMap">
+        SELECT
+            id, userName, password, email, phone,
+            userInfo, areaCode, showName,departmentId
+        FROM t_ythpt_user
+        WHERE userName = #{userName}
+    </select>
+
+    <!-- 子查询：查角色 -->
+    <select id="selectRolesByUserId" resultType="java.lang.String">
+        SELECT role FROM t_ythpt_user_role WHERE parentId = #{userId}
+    </select>
+
+    <!-- resultMap：用 select 加载角色 -->
+    <resultMap id="UserWithRolesMap" type="com.tao.userloginandauth.pojo.User">
+        <id property="id" column="id"/>
+        <result property="userName" column="userName"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="userInfo" column="userInfo"/>
+        <result property="areaCode" column="areaCode"/>
+        <result property="showName" column="showName"/>
+        <collection property="role" ofType="java.lang.String" select="selectRolesByUserId" column="id"/>
+    </resultMap>
+
+
+
+</mapper>

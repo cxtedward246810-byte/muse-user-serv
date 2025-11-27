@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tao.userloginandauth.mapper.CASAMapper">
+
+    <select id="selectData" resultType="java.util.HashMap">
+        select  * from t_ythpt_user_encry
+    </select>
+    <select id="selectEncryData" resultType="java.util.HashMap">
+        select  * from t_ythpt_user_encry
+    </select>
+    <select id="selectStaInfoData" resultType="java.util.HashMap">
+        select * from T_GRIDFORECAST_LOG_MAC
+    </select>
+    <select id="selectGisPolygon" resultType="java.util.HashMap">
+        select  * from t_sea_gis_polygon
+    </select>
+    <select id="selectMATERIAL" resultType="java.util.HashMap">
+        select  to_char(CONTENT) as CONTENT,NAME,AREACODE,TYPENAME,SYSTEMTYPE,to_char(EMAILS) as EMAILS,MAILTITLE,to_char(MAILCONTENT) as MAILCONTENT,TASKNAME,historyProductType  from T_DATA_MATERIAL
+    </select>
+    <select id="selectEncryStationInfo" resultType="java.util.HashMap">
+        select  * from t_station_info_encry
+    </select>
+</mapper>
