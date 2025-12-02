@@ -1,12 +1,18 @@
 package com.tao.userloginandauth.controller;
 
 import com.tao.userloginandauth.pojo.User;
+import com.tao.userloginandauth.pojo.userDTO;
 import com.tao.userloginandauth.service.UserService;
 import com.tao.userloginandauth.util.JwtUtil;
 import com.tao.userloginandauth.vo.SysResult;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Description //TODO
  * Create by 2023/7/17
@@ -99,6 +105,63 @@ public class UserController {
         return userService.getUserList(departmentId, areaCode, order, sort, pageSize, currentPage,userName,showName);
     }
 
+
+    @GetMapping("/getUserMsg")
+    public SysResult getUserMsg(@RequestParam String userName) throws ClassNotFoundException {
+           Integer pageSize = 10;
+           Integer currentPage = 1;
+                SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null);
+        // 取出 data
+        Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
+
+// 从 pageVO 中取出 records
+        List<userDTO> records = (List<userDTO>) pageVO.get("records");
+
+//取出第一个用户
+        userDTO first = (records == null || records.isEmpty()) ? null : records.get(0);
+
+// 只保留想返回的字段
+        Map<String, Object> userVO = null;
+        if (first != null) {
+            userVO = new HashMap<>();
+            userVO.put("id", first.getId());
+            userVO.put("departmentId", first.getDepartmentId());
+            userVO.put("userName", first.getUserName());
+            userVO.put("roles", first.getRoles());
+        }
+
+        return SysResult.success(userVO);
+
+    }
+
+
+
+    @GetMapping("/getUserShowName")
+    public SysResult getUserShowName(@RequestParam String userName) throws ClassNotFoundException {
+        Integer pageSize = 10;
+        Integer currentPage = 1;
+        SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null);
+        // 取出 data
+        Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
+
+// 从 pageVO 中取出 records
+        List<userDTO> records = (List<userDTO>) pageVO.get("records");
+
+//取出第一个用户
+        userDTO first = (records == null || records.isEmpty()) ? null : records.get(0);
+
+// 只保留想返回的字段
+        Map<String, Object> userVO = null;
+        if (first != null) {
+            userVO = new HashMap<>();
+            userVO.put("id", first.getId());
+            userVO.put("userName", first.getUserName());
+            userVO.put("showName", first.getShowName());
+        }
+
+        return SysResult.success(userVO);
+
+    }
 
     @PostMapping("/deleteUser")
     public SysResult deleteUser(@RequestParam("id") String id){
