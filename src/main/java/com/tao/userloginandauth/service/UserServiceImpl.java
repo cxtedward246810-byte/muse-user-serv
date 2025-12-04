@@ -278,7 +278,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public SysResult getUserList(String departmentId, String adminCode,
                                  String order, String sort, Integer pageSize, Integer currentPage,
-                                 String userName, String showName) throws ClassNotFoundException {
+                                 String userName, String showName,String isMoHu) throws ClassNotFoundException {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
 
@@ -293,11 +293,15 @@ public class UserServiceImpl implements UserService {
             }
             adminCode = "%" + adminCode + "%";
         }
-
         if (userName != null && !userName.isEmpty()) {
-            userName = "%" + userName + "%";
-            System.out.println(userName);
+            if(isMoHu.equals("yes")){
+                userName = "%" + userName + "%";
+                System.out.println(userName);
+            }else {
+                System.out.println("非模糊查询"+userName);
+            }
         }
+
         if (showName != null && !showName.isEmpty()) {
             showName = "%" + showName + "%";
             System.out.println(showName);

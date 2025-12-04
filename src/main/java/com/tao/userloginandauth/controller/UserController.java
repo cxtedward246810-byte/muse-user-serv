@@ -9,6 +9,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,15 +103,18 @@ public class UserController {
         if (currentPage == null) {
             currentPage = 1;
         }
-        return userService.getUserList(departmentId, areaCode, order, sort, pageSize, currentPage,userName,showName);
+        return userService.getUserList(departmentId, areaCode, order, sort, pageSize, currentPage,userName,showName,"yes");
     }
 
 
     @GetMapping("/getUserMsg")
     public SysResult getUserMsg(@RequestParam String userName) throws ClassNotFoundException {
+        if (userName == null|| userName.isEmpty()) {
+            return SysResult.success();
+        }
            Integer pageSize = 10;
            Integer currentPage = 1;
-                SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null);
+           SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null,"no");
         // 取出 data
         Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
 
@@ -137,29 +141,31 @@ public class UserController {
 
 
     @GetMapping("/getUserShowName")
-    public SysResult getUserShowName(@RequestParam String userName) throws ClassNotFoundException {
-        Integer pageSize = 10;
+    public SysResult getUserShowName() throws ClassNotFoundException {
+        Integer pageSize = 10000;
         Integer currentPage = 1;
-        SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null);
+        SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,null,null,"no");
         // 取出 data
         Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
 
 // 从 pageVO 中取出 records
         List<userDTO> records = (List<userDTO>) pageVO.get("records");
 
-//取出第一个用户
-        userDTO first = (records == null || records.isEmpty()) ? null : records.get(0);
-
+        List<Map<String, Object>> res=new ArrayList<>();
 // 只保留想返回的字段
-        Map<String, Object> userVO = null;
-        if (first != null) {
-            userVO = new HashMap<>();
-            userVO.put("id", first.getId());
-            userVO.put("userName", first.getUserName());
-            userVO.put("showName", first.getShowName());
+       Map<String, Object> userVO = null;
+        for (userDTO userDTO : records) {
+            if (userDTO != null) {
+                userVO = new HashMap<>();
+                userVO.put("id", userDTO.getId());
+                userVO.put("userName", userDTO.getUserName());
+                userVO.put("showName", userDTO.getShowName());
+                res.add(userVO);
+            }
+
         }
 
-        return SysResult.success(userVO);
+        return SysResult.success(res);
 
     }
 
