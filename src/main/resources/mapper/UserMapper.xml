@@ -65,6 +65,11 @@
         from t_ythpt_user
     </select>
 
+    <select id="getDepartByAreaCode" resultType="TDepart">
+        select *
+        from T_DEPART WHERE DepartCode = #{departCode}
+    </select>
+
     <delete id="deleteUser">
         delete from  t_ythpt_user
         where id = #{id}

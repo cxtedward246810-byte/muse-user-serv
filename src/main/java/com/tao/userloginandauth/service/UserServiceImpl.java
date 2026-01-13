@@ -7,6 +7,7 @@ import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.tao.userloginandauth.component.CustomRedisTemplate;
 import com.tao.userloginandauth.mapper.UserMapper;
 import com.tao.userloginandauth.pojo.LoginUser;
+import com.tao.userloginandauth.pojo.TDepart;
 import com.tao.userloginandauth.pojo.User;
 import com.tao.userloginandauth.pojo.userDTO;
 import com.tao.userloginandauth.util.JwtUtil;
@@ -21,10 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.*;
 
 import java.util.concurrent.TimeUnit;
@@ -46,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private JwtUtil jwtUtil;
-    // MySQL 连接信息（可改成读取配置）
+
     String URL = "jdbc:mysql://10.158.96.40:3306/db_cloudtao_wfs_qxt?useSSL=false&serverTimezone=UTC";
     String USERNAME = "root";
     String PASSWORD = "Jm3!gTz8#Rw9XpQ2";
@@ -107,11 +105,22 @@ public class UserServiceImpl implements UserService {
                 userInfoMap=new HashMap<>();
             }
             String ranDomNum = sb.toString();
+
+            String departCode= loginUser.getUser().getAreaCode();
+            departCode= normalizeDepartCode(departCode);
+            TDepart tDepart = userMapper.getDepartByAreaCode(departCode);
+
             HashMap<String, Object> map = new HashMap<>();
             userInfoMap.put("userName", loginUser.getUser().getUserName());
             userInfoMap.put("areaCode", loginUser.getUser().getAreaCode());
             userInfoMap.put("roleCodes", roleCodes);
             userInfoMap.put("userId",loginUser.getUser().getId());
+            userInfoMap.put("departId", tDepart.getDepartId());
+            userInfoMap.put("areaId",tDepart.getAreaId());
+            userInfoMap.put("departName", tDepart.getDepartName());
+            userInfoMap.put("parentId", tDepart.getParentId());
+            userInfoMap.put("codeOfTownForecast",tDepart.getCodeOfTownForecast());
+            userInfoMap.put("codeOfGuidanceForecast",tDepart.getCodeOfGuidanceForecast());
             map.put("userName", loginUser.getUser().getUserName());
             map.put("areaCode", loginUser.getUser().getAreaCode());
             map.put("roleCodes", roleCodes);
@@ -143,7 +152,13 @@ public class UserServiceImpl implements UserService {
 //            throw new RuntimeException(e);
         }
     }
-
+//450000--->45  450100--->4501
+    public static String normalizeDepartCode(String departCode) {
+        while (departCode.endsWith("00")) {
+            departCode = departCode.substring(0, departCode.length() - 2);
+        }
+        return departCode;
+    }
 
 
     @Override
@@ -531,4 +546,7 @@ public class UserServiceImpl implements UserService {
             return SysResult.fail("删除失败：" + e.getMessage(), false);
         }
     }
+
+
+
 }

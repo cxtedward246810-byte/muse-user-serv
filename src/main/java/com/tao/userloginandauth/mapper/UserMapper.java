@@ -1,8 +1,8 @@
 package com.tao.userloginandauth.mapper;
 
 
+import com.tao.userloginandauth.pojo.TDepart;
 import com.tao.userloginandauth.pojo.User;
-import com.tao.userloginandauth.vo.SysResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,6 +16,8 @@ import java.util.List;
 
 @Mapper
 public interface UserMapper {
+
+    TDepart getDepartByAreaCode( String departCode );
 //
     List<User> selectALLUser();
     User selectByUser(String admin);

@@ -3,9 +3,7 @@ package com.tao.userloginandauth.controller;
 import com.tao.userloginandauth.pojo.User;
 import com.tao.userloginandauth.pojo.userDTO;
 import com.tao.userloginandauth.service.UserService;
-import com.tao.userloginandauth.util.JwtUtil;
 import com.tao.userloginandauth.vo.SysResult;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,17 +25,17 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+//    @Autowired
+//    private JwtUtil jwtUtil;
 
 
-    @GetMapping("/test")
-    public void test() {
-        Claims claims = jwtUtil.verifyJwt("eyJhbGciOiJSUzI1NiJ9.eyJhcmVhQ29kZSI6IjQ1MDAwMCIsInRva2VuSWQiOiIxNzcyMzU4MTA3MTAzMzM0IiwiZGVwYXJ0bWVudElkIjoiMWJhNzllOTAtZDc2OS00ZDc2LWJlZGMtYWJlNTUwMzFlNzkzIiwicm9sZUNvZGVzIjpbInJvbGUtYWRtaW4iLCJyb2xlLWNvbW1vbiIsInJvbGUtbG93Y29kZSJdLCJ1c2VyTmFtZSI6ImFkbWluIiwidXNlcklkIjoxLCJpYXQiOjE3NjMxODY5ODgsImV4cCI6MTc2MzQ0NjE4OH0.TqdxQeSu8tITzGIaBvJe3wia7Nfh1opV9eilYlrTTuaBmWCJfOD4diV3nseAgBgD_5FQABs41JHH9Sv9euda_lXCm_f6LxTsOwP_psRdL9wtqVA8C_iOC7AAgjRw5OPmPQzOF8hmorkW_cjXRol71ijGsV2QRG_9qEOcYQ0pgeOcaO1rE8Ih0pz1VxEcLZtGQnNNcTdgdWFbzdEAIP92k2pCw98K7UjNK6ultgc97keu-_O1iQSS10uOR5WXyPJa8HtVaz41unJsNT2VPiLWJwfkfhhL4vT4YzguqVoDO74eMgbOjiQqKJ-egNAfeaEDjKshtSDiYqGEbO123l7ADg");
-        boolean hasDeptId = claims.containsKey("departmentId");     // 推荐
-        Object deptId = claims.get("departmentId");
-        System.out.println(hasDeptId);
-    }
+//    @GetMapping("/test")
+//    public void test() {
+//        Claims claims = jwtUtil.verifyJwt("eyJhbGciOiJSUzI1NiJ9.eyJhcmVhQ29kZSI6IjQ1MDAwMCIsInRva2VuSWQiOiIxNzcyMzU4MTA3MTAzMzM0IiwiZGVwYXJ0bWVudElkIjoiMWJhNzllOTAtZDc2OS00ZDc2LWJlZGMtYWJlNTUwMzFlNzkzIiwicm9sZUNvZGVzIjpbInJvbGUtYWRtaW4iLCJyb2xlLWNvbW1vbiIsInJvbGUtbG93Y29kZSJdLCJ1c2VyTmFtZSI6ImFkbWluIiwidXNlcklkIjoxLCJpYXQiOjE3NjMxODY5ODgsImV4cCI6MTc2MzQ0NjE4OH0.TqdxQeSu8tITzGIaBvJe3wia7Nfh1opV9eilYlrTTuaBmWCJfOD4diV3nseAgBgD_5FQABs41JHH9Sv9euda_lXCm_f6LxTsOwP_psRdL9wtqVA8C_iOC7AAgjRw5OPmPQzOF8hmorkW_cjXRol71ijGsV2QRG_9qEOcYQ0pgeOcaO1rE8Ih0pz1VxEcLZtGQnNNcTdgdWFbzdEAIP92k2pCw98K7UjNK6ultgc97keu-_O1iQSS10uOR5WXyPJa8HtVaz41unJsNT2VPiLWJwfkfhhL4vT4YzguqVoDO74eMgbOjiQqKJ-egNAfeaEDjKshtSDiYqGEbO123l7ADg");
+//        boolean hasDeptId = claims.containsKey("departmentId");     // 推荐
+//        Object deptId = claims.get("departmentId");
+//        System.out.println(hasDeptId);
+//    }
 
 
     @PostMapping("/login") //测试数据 admin123 admin123  //admin admin123456
