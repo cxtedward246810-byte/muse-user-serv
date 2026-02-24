@@ -24,8 +24,8 @@ public interface UserService {
 
     SysResult randomLenNum(Integer length);
 
-    SysResult getUserList(String departmentId, String adminCode,
-                          String order, String sort, Integer pageSize, Integer currentPage,String username,String showName,String isMoHu) throws ClassNotFoundException;
+    SysResult getUserList(String userIds,String departmentId, String adminCode,
+                          String order, String sort, Integer pageSize, Integer currentPage,String username,String showName,String isMoHu,Boolean recursive) throws ClassNotFoundException;
 
     SysResult deleteUserInfomation(String id);
 }

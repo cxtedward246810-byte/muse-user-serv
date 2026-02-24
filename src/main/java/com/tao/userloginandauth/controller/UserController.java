@@ -2,8 +2,11 @@ package com.tao.userloginandauth.controller;
 
 import com.tao.userloginandauth.pojo.User;
 import com.tao.userloginandauth.pojo.userDTO;
+import com.tao.userloginandauth.service.RoleUserService;
 import com.tao.userloginandauth.service.UserService;
+import com.tao.userloginandauth.util.JwtUtil;
 import com.tao.userloginandauth.vo.SysResult;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description //TODO
@@ -25,17 +29,25 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    private JwtUtil jwtUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
-//    @GetMapping("/test")
-//    public void test() {
-//        Claims claims = jwtUtil.verifyJwt("eyJhbGciOiJSUzI1NiJ9.eyJhcmVhQ29kZSI6IjQ1MDAwMCIsInRva2VuSWQiOiIxNzcyMzU4MTA3MTAzMzM0IiwiZGVwYXJ0bWVudElkIjoiMWJhNzllOTAtZDc2OS00ZDc2LWJlZGMtYWJlNTUwMzFlNzkzIiwicm9sZUNvZGVzIjpbInJvbGUtYWRtaW4iLCJyb2xlLWNvbW1vbiIsInJvbGUtbG93Y29kZSJdLCJ1c2VyTmFtZSI6ImFkbWluIiwidXNlcklkIjoxLCJpYXQiOjE3NjMxODY5ODgsImV4cCI6MTc2MzQ0NjE4OH0.TqdxQeSu8tITzGIaBvJe3wia7Nfh1opV9eilYlrTTuaBmWCJfOD4diV3nseAgBgD_5FQABs41JHH9Sv9euda_lXCm_f6LxTsOwP_psRdL9wtqVA8C_iOC7AAgjRw5OPmPQzOF8hmorkW_cjXRol71ijGsV2QRG_9qEOcYQ0pgeOcaO1rE8Ih0pz1VxEcLZtGQnNNcTdgdWFbzdEAIP92k2pCw98K7UjNK6ultgc97keu-_O1iQSS10uOR5WXyPJa8HtVaz41unJsNT2VPiLWJwfkfhhL4vT4YzguqVoDO74eMgbOjiQqKJ-egNAfeaEDjKshtSDiYqGEbO123l7ADg");
-//        boolean hasDeptId = claims.containsKey("departmentId");     // 推荐
-//        Object deptId = claims.get("departmentId");
-//        System.out.println(hasDeptId);
-//    }
+    @GetMapping("/getUserMsgByToken")
+    public SysResult getUserMsgByToken(@RequestParam String token) throws ClassNotFoundException {
+        Claims claims = jwtUtil.verifyJwt(token);
+        boolean hasUserName = claims.containsKey("userName");     // 推荐
+        if (!hasUserName) {
+            return SysResult.fail("token中未包含userName！！！");
+        }
+        boolean hasAreaCode = claims.containsKey("areaCode");
+        if (!hasAreaCode) {
+            return SysResult.fail("token中未包含areaCode！！！");
+        }
+        String userName = (String) claims.get("userName");
+        String areaCode = (String) claims.get("areaCode");
+        return userService.getUserList(null,null,areaCode, null, null, 10, 1,userName,null,"yes",false);
+    }
 
 
     @PostMapping("/login") //测试数据 admin123 admin123  //admin admin123456
@@ -84,7 +96,8 @@ public class UserController {
     public SysResult getAllUserInfo(){
         return userService.getAllUserInfo();
     }
-
+    @Autowired
+    private RoleUserService roleUserService;
 //查询用户列表
     @GetMapping("/getUserList")
     public SysResult getUserList(@RequestParam(required = false) String departmentId,
@@ -94,14 +107,24 @@ public class UserController {
                                  @RequestParam(required = false) Integer pageSize,
                                  @RequestParam(required = false) Integer currentPage,
                                  @RequestParam(required = false) String userName,
-                                 @RequestParam(required = false) String showName) throws ClassNotFoundException {
+                                 @RequestParam(required = false) String showName,
+                                 @RequestParam(required = false) String roleCode,
+                                 @RequestParam(required = false) Boolean recursive) throws ClassNotFoundException {
         if (pageSize == null) {
             pageSize = 10;
         }
         if (currentPage == null) {
             currentPage = 1;
         }
-        return userService.getUserList(departmentId, areaCode, order, sort, pageSize, currentPage,userName,showName,"yes");
+        List<String> userIds;
+        String userIdsInSql=null;
+        if (roleCode!=null){
+            userIds=roleUserService.queryUserIdsByRoleCode(roleCode);
+            userIdsInSql = userIds.stream()
+                    .map(id -> "'" + id + "'")
+                    .collect(Collectors.joining(",", "(", ")"));
+        }
+        return userService.getUserList(userIdsInSql,departmentId, areaCode, order, sort, pageSize, currentPage,userName,showName,"yes",recursive);
     }
 
 
@@ -112,7 +135,7 @@ public class UserController {
         }
            Integer pageSize = 10;
            Integer currentPage = 1;
-           SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,userName,null,"no");
+           SysResult sysResult =userService.getUserList(null,null, null, null, null, pageSize, currentPage,userName,null,"no",false);
         // 取出 data
         Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
 
@@ -142,7 +165,7 @@ public class UserController {
     public SysResult getUserShowName() throws ClassNotFoundException {
         Integer pageSize = 10000;
         Integer currentPage = 1;
-        SysResult sysResult =userService.getUserList(null, null, null, null, pageSize, currentPage,null,null,"no");
+        SysResult sysResult =userService.getUserList(null,null, null, null, null, pageSize, currentPage,null,null,"no",false);
         // 取出 data
         Map<String, Object> pageVO = (Map<String, Object>) sysResult.getData();
 

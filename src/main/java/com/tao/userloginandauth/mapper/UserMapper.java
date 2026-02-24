@@ -33,7 +33,7 @@ public interface UserMapper {
 //    void insertRole(Long userId, int roleId);
 
     User getUserById(String userid);
-
+    List<User> getUserByIds(String userids);
     Boolean register(User user);
 
     void update(User user);
@@ -45,7 +45,8 @@ public interface UserMapper {
 
     User getUserInfoByUserName(@Param("userName") String userName);
 
-    List<User> getUserListByConditions(@Param("departmentId") String departmentId,
+    List<User> getUserListByConditions(@Param("userIds") String userIds,
+                                       @Param("departmentId") String departmentId,
                                        @Param("areaCode") String areaCode,
                                        @Param("sort") String sort,
                                        @Param("order") String order,

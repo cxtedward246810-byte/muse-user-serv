@@ -109,13 +109,16 @@ public class UserServiceImpl implements UserService {
             String departCode= loginUser.getUser().getAreaCode();
             departCode= normalizeDepartCode(departCode);
             TDepart tDepart = userMapper.getDepartByAreaCode(departCode);
-
+            if (tDepart == null) {
+                tDepart = new TDepart();
+            }
             HashMap<String, Object> map = new HashMap<>();
             userInfoMap.put("userName", loginUser.getUser().getUserName());
             userInfoMap.put("areaCode", loginUser.getUser().getAreaCode());
             userInfoMap.put("roleCodes", roleCodes);
             userInfoMap.put("userId",loginUser.getUser().getId());
-            userInfoMap.put("departId", tDepart.getDepartId());
+            userInfoMap.put("departID", tDepart.getDepartId());
+            userInfoMap.put("departCode",tDepart.getDepartCode());
             userInfoMap.put("areaId",tDepart.getAreaId());
             userInfoMap.put("departName", tDepart.getDepartName());
             userInfoMap.put("parentId", tDepart.getParentId());
@@ -206,7 +209,7 @@ public class UserServiceImpl implements UserService {
 
         try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1,java.util.UUID.randomUUID().toString());
+            ps.setString(1, UUID.randomUUID().toString());
             ps.setString(2, String.valueOf(user2.getId()));
             ps.setString(3, "3b85437c-ab04-4a36-a565-c73792bbd9fb");
             ps.setString(4, "role-common");
@@ -291,10 +294,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SysResult getUserList(String departmentId, String adminCode,
+    public SysResult getUserList(String userIds,String departmentId, String adminCode,
                                  String order, String sort, Integer pageSize, Integer currentPage,
-                                 String userName, String showName,String isMoHu) throws ClassNotFoundException {
+                                 String userName, String showName,String isMoHu,Boolean recursive) throws ClassNotFoundException {
 
+        if (recursive==null){
+            recursive=true;
+        }
         Class.forName("com.mysql.cj.jdbc.Driver");
 
         int offset = (currentPage - 1) * pageSize;
@@ -323,17 +329,23 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            List<User> userList;
+            List<User> userList = new ArrayList<>();
 
             // ====================================================
             //  departmentId 为空 → 直接查
             // ====================================================
-            if (departmentId == null || departmentId.trim().isEmpty()) {
 
-                userList = userMapper.getUserListByConditions(
-                        null, adminCode, sort, order, offset, pageSize, userName, showName);
+                if (departmentId==null|| departmentId.isEmpty()) {
+                    userList = userMapper.getUserListByConditions(userIds,
+                            null, adminCode, sort, order, offset, pageSize, userName, showName);
+                }
+            if (!recursive&&departmentId!=null) {
 
-            } else {
+                userList = userMapper.getUserListByConditions(userIds,
+                        "('"+departmentId+"')", adminCode, sort, order, offset, pageSize, userName, showName);
+
+            }
+            if (recursive&&departmentId!=null) {
 
                 /* ---------------------------------------------------------
                  *   ① 先 BFS 查子部门（使用同一 Connection）
@@ -371,7 +383,7 @@ public class UserServiceImpl implements UserService {
                     /* ---------------------------------------------------------
                      *   ③ 查询用户（此处仍使用 MyBatis）
                      * --------------------------------------------------------- */
-                    userList = userMapper.getUserListByConditions(
+                    userList = userMapper.getUserListByConditions(userIds,
                             deptIdSql, adminCode, sort, order, offset, pageSize, userName, showName);
 
 
