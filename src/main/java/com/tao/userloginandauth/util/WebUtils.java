@@ -16,15 +16,16 @@ public class WebUtils {
      * @return null
      */
     public static String renderString(HttpServletResponse response, String string) {
-        try
-        {
-            response.setStatus(200);
+        return renderString(response, HttpServletResponse.SC_OK, string);
+    }
+
+    public static String renderString(HttpServletResponse response, int status, String string) {
+        try {
+            response.setStatus(status);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;

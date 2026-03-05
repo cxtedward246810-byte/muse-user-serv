@@ -24,10 +24,11 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         SysResult result = SysResult.fail(HttpStatus.FORBIDDEN.value(), "user-service--权限不足"); //         SysResult result =new SysResult.fail(HttpStatus.FORBIDDEN.value(), "权限不足");
         String json = JSON.toJSONString(result);
-        WebUtils.renderString(response,json);
+        WebUtils.renderString(response, HttpStatus.FORBIDDEN.value(), json);
 
     }
 }
+
 
 
 

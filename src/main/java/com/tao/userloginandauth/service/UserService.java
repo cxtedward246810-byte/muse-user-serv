@@ -28,4 +28,8 @@ public interface UserService {
                           String order, String sort, Integer pageSize, Integer currentPage,String username,String showName,String isMoHu,Boolean recursive) throws ClassNotFoundException;
 
     SysResult deleteUserInfomation(String id);
+
+    SysResult changePassword(String token, String oldPassword, String newPassword);
+
+    SysResult resetPassword(String token, String userId);
 }

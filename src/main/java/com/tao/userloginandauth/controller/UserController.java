@@ -8,8 +8,10 @@ import com.tao.userloginandauth.util.JwtUtil;
 import com.tao.userloginandauth.vo.SysResult;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,6 +195,33 @@ public class UserController {
     @PostMapping("/deleteUser")
     public SysResult deleteUser(@RequestParam("id") String id){
         return userService.deleteUserInfomation(id);
+    }
+
+    @PostMapping("/changePassword")
+    public SysResult changePassword(HttpServletRequest request, @RequestBody Map<String, String> params){
+        String token = resolveToken(request);
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
+        return userService.changePassword(token, oldPassword, newPassword);
+    }
+
+    @PostMapping("/resetPassword")
+    public SysResult resetPassword(HttpServletRequest request, @RequestBody Map<String, String> params){
+        String token = resolveToken(request);
+        String userId = params.get("userId");
+        return userService.resetPassword(token, userId);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        if (StringUtils.hasText(token)) {
+            return token;
+        }
+        String authorization = request.getHeader("Authorization");
+        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
     }
 
 }

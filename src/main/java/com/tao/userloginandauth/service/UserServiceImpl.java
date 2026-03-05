@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final String DEFAULT_RESET_PASSWORD = "Ythpt@2024";
 
     @Autowired
     private UserMapper userMapper;
@@ -559,6 +560,120 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
+    @Override
+    public SysResult changePassword(String token, String oldPassword, String newPassword) {
+        if (token == null || token.trim().isEmpty()) {
+            return SysResult.fail("token不能为空");
+        }
+        if (oldPassword == null || oldPassword.trim().isEmpty()) {
+            return SysResult.fail("原密码不能为空");
+        }
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return SysResult.fail("新密码不能为空");
+        }
+
+        try {
+            Claims claims = jwtUtil.verifyJwt(token);
+            Object userNameObj = claims.get("userName");
+            if (userNameObj == null) {
+                return SysResult.fail("token中未包含userName");
+            }
+            String userName = String.valueOf(userNameObj);
+            User currentUser = userMapper.getUserInfoByUserName(userName);
+            if (currentUser == null) {
+                return SysResult.fail("用户不存在");
+            }
+
+            BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+            if (!bCryptPasswordEncoder.matches(oldPassword, currentUser.getPassword())) {
+                return SysResult.fail("原密码错误");
+            }
+            if (bCryptPasswordEncoder.matches(newPassword, currentUser.getPassword())) {
+                return SysResult.fail("新密码不能与原密码一致");
+            }
+
+            User updateUser = new User();
+            updateUser.setId(currentUser.getId());
+            updateUser.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            userMapper.update(updateUser);
+            return SysResult.success("密码修改成功", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return SysResult.fail("密码修改失败");
+        }
+    }
+
+    @Override
+    public SysResult resetPassword(String token, String userId) {
+        if (token == null || token.trim().isEmpty()) {
+            return SysResult.fail("token不能为空");
+        }
+        if (userId == null || userId.trim().isEmpty()) {
+            return SysResult.fail("userId不能为空");
+        }
+
+        try {
+            Claims claims = jwtUtil.verifyJwt(token);
+            Set<String> roleCodes = parseRoleCodes(claims.get("roleCodes"));
+            boolean hasPermission = roleCodes.contains("role-root")
+                    || roleCodes.contains("role-admin")
+                    || roleCodes.contains("role-manage");
+            if (!hasPermission) {
+                return SysResult.fail("无权重置密码");
+            }
+
+            User currentUser = userMapper.getUserById(userId);
+            if (currentUser == null) {
+                return SysResult.fail("用户不存在");
+            }
+
+            BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+            if (bCryptPasswordEncoder.matches(DEFAULT_RESET_PASSWORD, currentUser.getPassword())) {
+                return SysResult.fail("新密码不能与原密码一致");
+            }
+
+            User updateUser = new User();
+            updateUser.setId(currentUser.getId());
+            updateUser.setPassword(bCryptPasswordEncoder.encode(DEFAULT_RESET_PASSWORD));
+            userMapper.update(updateUser);
+            return SysResult.success("密码重置成功", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return SysResult.fail("密码重置失败");
+        }
+    }
+
+    private Set<String> parseRoleCodes(Object roleCodesObj) {
+        Set<String> roles = new HashSet<>();
+        if (roleCodesObj == null) {
+            return roles;
+        }
+        if (roleCodesObj instanceof Collection) {
+            Collection<?> values = (Collection<?>) roleCodesObj;
+            for (Object value : values) {
+                if (value != null) {
+                    roles.add(String.valueOf(value).trim());
+                }
+            }
+            return roles;
+        }
+        String raw = String.valueOf(roleCodesObj).trim();
+        if (raw.isEmpty()) {
+            return roles;
+        }
+        if (raw.startsWith("[") && raw.endsWith("]")) {
+            raw = raw.substring(1, raw.length() - 1);
+        }
+        String[] split = raw.split(",");
+        for (String item : split) {
+            String role = item == null ? "" : item.trim();
+            if (!role.isEmpty()) {
+                roles.add(role);
+            }
+        }
+        return roles;
+    }
 
 
 }

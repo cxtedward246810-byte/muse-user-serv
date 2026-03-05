@@ -28,9 +28,10 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         SysResult result =  SysResult.fail(HttpStatus.UNAUTHORIZED.value(), "user-service-token认证失败");
         String json = JSON.toJSONString(result);
-        WebUtils.renderString(response,json);
+        WebUtils.renderString(response, HttpStatus.UNAUTHORIZED.value(), json);
     }
 }
+
 
 
 
